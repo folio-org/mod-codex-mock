@@ -17,18 +17,11 @@ import java.util.Set;
 import javax.ws.rs.core.Response;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Instance;
+import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 
 
 public class CodexMockImpl implements CodexInstancesResource {
-
-  @Override
-  public void getCodexInstances(String query, int offset, int limit, String lang,
-    Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
 
   private Instance makeInst(String id) {
     Instance inst = new Instance();
@@ -43,13 +36,33 @@ public class CodexMockImpl implements CodexInstancesResource {
   }
 
   @Override
+  public void getCodexInstances(String query, int offset, int limit, String lang,
+    Map<String, String> okapiHeaders,
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    List<Instance> lst = new LinkedList<>();
+    lst.add(makeInst("11111111-1111-1111-1111-111111111111"));
+    lst.add(makeInst("11111111-1111-1111-1111-111111111112"));
+    InstanceCollection coll = new InstanceCollection();
+    coll.setInstances(lst);
+    coll.setTotalRecords(2);
+    asyncResultHandler.handle(succeededFuture(GetCodexInstancesResponse.withJsonOK(coll)));
+  }
+
+  @Override
   public void getCodexInstancesById(String id, String lang,
     Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
-    Instance inst = makeInst(id);
+    if (id.equals("11111111-1111-1111-1111-111111111111")
+      || id.equals("11111111-1111-1111-1111-111111111112")) {
+      Instance inst = makeInst(id);
+      asyncResultHandler.handle(succeededFuture(
+        GetCodexInstancesByIdResponse.withJsonOK(inst)));
+      return;
+    }
     asyncResultHandler.handle(succeededFuture(
-      GetCodexInstancesByIdResponse.withJsonOK(inst)));
+      GetCodexInstancesByIdResponse.withPlainNotFound(id)));
+
   }
 
 }
