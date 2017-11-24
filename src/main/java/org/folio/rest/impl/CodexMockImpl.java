@@ -24,11 +24,16 @@ import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 public class CodexMockImpl implements CodexInstancesResource {
 
   private Instance makeInst(String id) {
+    String key = id.replaceFirst(".*-", "");
     Instance inst = new Instance();
     inst.setId(id);
-    inst.setTitle("Title of " + id);
+    inst.setTitle("Title of " + key);
+    inst.setAltTitle("alt title for " + key);
+    inst.setPublisher("Publisher for " + key);
+    inst.setType("Type for " + key);
     Contributor cont = new Contributor();
-    cont.setName("Contributor of " + id);
+    cont.setName("Contributor of " + key);
+    cont.setType("some type");
     Set<Contributor> contset = new LinkedHashSet<>();
     contset.add(cont);
     inst.setContributor(contset);
