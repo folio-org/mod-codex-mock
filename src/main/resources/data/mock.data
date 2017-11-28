@@ -1,0 +1,2 @@
+11111111-1111-1111-1111-111111111111| { "title" : "Title of 111111111111", "altTitle" : "alt title for 111111111111", "contributor" : [ { "type" : "some type", "name" : "Contributor of 111111111111" } ], "publisher" : "Publisher for 111111111111", "type" : "Type for 111111111111" }
+11111111-1111-1111-1111-111111111112| { "title" : "Title of 111111111112", "altTitle" : "alt title for 111111111112", "contributor" : [ { "type" : "some type", "name" : "Contributor of 111111111112" } ], "publisher" : "Publisher for 111111111112", "type" : "Type for 111111111112" }
