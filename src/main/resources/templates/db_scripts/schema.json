@@ -1,0 +1,19 @@
+{
+  "scripts": [
+    {
+      "run": "after",
+      "snippet": "COPY codex_mock_data (id,jsonb) FROM 'data/mock.data' DELIMITER '|' ENCODING 'UTF8';",
+      "fromModuleVersion": 0
+    }
+  ],
+  "tables": [
+    {
+      "tableName": "codex_mock_data",
+      "fromModuleVersion": 0.2,
+      "withMetadata": true,
+      "generateId": true,
+      "populateJsonWithId": true,
+      "ginIndex": true
+    }
+  ]
+}
