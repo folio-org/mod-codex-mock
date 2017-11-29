@@ -70,6 +70,6 @@ ps | grep java && ( echo ... ; sleep 1  )
 ps | grep java && ( echo ... ; sleep 1  )
 ps | grep java && ( echo ... ; sleep 1  )
 rm -rf /tmp/postgresql-embed*
-ps | grep java && echo "OOPS - Still some processes running"
+ps | grep java | grep -v "grep java" && echo "OOPS - Still some java processes running"
 echo bye
 
