@@ -22,7 +22,7 @@ OKAPIPATH="../okapi/okapi-core/target/okapi-core-fat.jar"
 java -Dport=$OKAPIPORT -jar $OKAPIPATH dev > okapi.log 2>&1 &
 PID=$!
 echo Started okapi on port $OKAPIPORT. PID=$PID
-sleep 1 # give it time to start
+sleep 2 # give it time to start
 echo
 
 # Load the module
@@ -70,6 +70,6 @@ ps | grep java && ( echo ... ; sleep 1  )
 ps | grep java && ( echo ... ; sleep 1  )
 ps | grep java && ( echo ... ; sleep 1  )
 rm -rf /tmp/postgresql-embed*
-ps | grep java && echo "OOPS - Still some processes running"
+ps | grep java | grep -v "grep java" && echo "OOPS - Still some java processes running"
 echo bye
 
