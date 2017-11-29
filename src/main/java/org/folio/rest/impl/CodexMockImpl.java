@@ -102,11 +102,20 @@ public class CodexMockImpl implements CodexInstancesResource {
     Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
     try {
-      logger.info("Getting mock instances " + offset + "+" + limit + " q=" + query);
-
+      String mockN = System.getProperty("mock");
+      logger.info("Getting mock instances " + offset + "+" + limit + " q=" + query + " m=" + mockN);
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
+      if (mockN != null) {
+        String mockPart = mockN + mockN + mockN + mockN;
+        String mq = "id=0000 OR id=" + mockPart;
+        if (query == null) {
+          query = mq;
+        } else {
+          query = "(" + query + ") AND (" + mq + ")";
+        }
+      }
       CQLWrapper cql = getCQL(query, limit, offset, MOCK_SCHEMA);
 
       PostgresClient.getInstance(vertxContext.owner(), tenantId)

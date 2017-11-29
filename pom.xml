@@ -272,6 +272,22 @@
                   <sourceFile>${project.build.directory}/DeploymentDescriptor-template.json</sourceFile>
                   <destinationFile>${project.build.directory}/DeploymentDescriptor.json</destinationFile>
                 </fileSet>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/ModuleDescriptor-one-template.json</sourceFile>
+                  <destinationFile>${project.build.directory}/ModuleDescriptor-one.json</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/DeploymentDescriptor-one-template.json</sourceFile>
+                  <destinationFile>${project.build.directory}/DeploymentDescriptor-one.json</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/ModuleDescriptor-two-template.json</sourceFile>
+                  <destinationFile>${project.build.directory}/ModuleDescriptor-two.json</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/DeploymentDescriptor-two-template.json</sourceFile>
+                  <destinationFile>${project.build.directory}/DeploymentDescriptor-two.json</destinationFile>
+                </fileSet>
               </fileSets>
             </configuration>
           </execution>

@@ -1,0 +1,9 @@
+{
+  "instId": "mock-two-localhost",
+  "srvcId": "${artifactId}-two-${version}",
+  "nodeId": "localhost",
+  "descriptor": {
+    "exec": "java -Dmock=2 -jar ../mod-codex-mock/target/mod-codex-mock-fat.jar -Dhttp.port=%p embed_postgres=true "
+  }
+}
+
