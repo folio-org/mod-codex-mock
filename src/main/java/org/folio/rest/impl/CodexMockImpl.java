@@ -5,6 +5,7 @@ import io.vertx.core.Context;
 import static io.vertx.core.Future.succeededFuture;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
@@ -108,8 +109,7 @@ public class CodexMockImpl implements CodexInstancesResource {
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
       if (mockN != null) {
-        String mockPart = mockN + mockN + mockN + mockN;
-        String mq = "id=0000 OR id=" + mockPart;
+        String mq = "id=" + mockN;
         if (query == null) {
           query = mq;
         } else {
@@ -119,7 +119,7 @@ public class CodexMockImpl implements CodexInstancesResource {
       CQLWrapper cql = getCQL(query, limit, offset, MOCK_SCHEMA);
 
       PostgresClient.getInstance(vertxContext.owner(), tenantId)
-        .get(MOCK_TABLE, InstanceCollection.class, new String[]{"*"}, cql,
+        .get(MOCK_TABLE, Instance.class, new String[]{"*"}, cql,
           true /*get count too*/, false /* set id */,
           reply -> {
             if (reply.succeeded()) {
@@ -166,20 +166,32 @@ public class CodexMockImpl implements CodexInstancesResource {
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    Criterion c = new Criterion(
-      new Criteria().addField(IDFIELDNAME).setJSONB(false)
-        .setOperation("=").setValue("'" + id + "'"));
+    String mockN = System.getProperty("mock");
+    String query = "id=" + id;
+    if (mockN != null) {
+      String mq = "id=" + mockN;
+      if (query == null) {
+        query = mq;
+      } else {
+        query = "(" + mq + ") AND (" + query + ")";
+      }
+    }
+    logger.info("Get one mock " + id + " q=" + query);
+    CQLWrapper cql = getCQL(query, 1, 0, MOCK_SCHEMA);
+
     PostgresClient.getInstance(vertxContext.owner(), tenantId)
-      .get(MOCK_TABLE, Instance.class, c, true,
+      .get(MOCK_TABLE, Instance.class, new String[]{"*"}, cql, true, true,
         reply -> {
           if (reply.succeeded()) {
             @SuppressWarnings("unchecked")
             List<Instance> instList = (List<Instance>) reply.result().getResults();
             if (instList.isEmpty()) {
+              logger.info("Got an empty list");
               asyncResultHandler.handle(succeededFuture(
-                GetCodexInstancesByIdResponse.withPlainNotFound(tenantId)));
+                GetCodexInstancesByIdResponse.withPlainNotFound(id)));
             } else {
               Instance inst = instList.get(0);
+              logger.info("Got inst " + Json.encode(instList));
               asyncResultHandler.handle(succeededFuture(
                 GetCodexInstancesByIdResponse.withJsonOK(inst)));
             }

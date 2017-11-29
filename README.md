@@ -13,14 +13,22 @@ This module provides a very minimal implementation of the codex interface. It
 has a small number of hard coded records, that it can list, and provide by the
 id.
 
-At the moment there is no query processing, no filtering, no paging, and no
-sorting. Some of these may be implemented soon.
-
 There is a script `run.sh` that loads the module into Okapi, enables it, and
 shows what it can do. It isn't all that much, but it shows that something works.
 
-The module makes no use of any database, and does not provide any tenant init
-interface to initialize anything. It does not depend on any other modules.
+The module loads a hard-coded list of instances into its database at tenant-init
+time. These can be queried and sorted according to the usual RMB conventions.
+
+### Multiple instances
+It is possible to enable the module several times for a tenant, by using the
+ModuleDescritors -one and -two that are provided. These have the `InterfaceType`
+set to `multiple`. The corresponding DeploymentDescriptors have a `-Dmock=1111`
+or `-dmock=2222` on their command line. This causes the module to filter out only
+records that contain that string as a part of their ids.  The test data contains
+records with one, the other, or both of these strings.
+
+This facility is intended for testing and developing the mod-codex-mux module,
+which needs to merge data from multiple sources.
 
 ## Additional information
 

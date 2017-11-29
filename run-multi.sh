@@ -91,11 +91,9 @@ $CURL $TEN $TWO\
   $OKAPIURL/codex-instances
 echo
 
-cat > /dev/null <<SKIPTHIS
-
 # Various tests
-echo Test 2: Get one item
-$CURL $TEN \
+echo Test 3: Get one item
+$CURL $TEN $ONE \
   $OKAPIURL/codex-instances/11111111-1111-1111-1111-111111111111
 echo
 
