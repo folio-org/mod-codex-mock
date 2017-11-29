@@ -22,7 +22,7 @@ OKAPIPATH="../okapi/okapi-core/target/okapi-core-fat.jar"
 java -Dport=$OKAPIPORT -jar $OKAPIPATH dev > okapi.log 2>&1 &
 PID=$!
 echo Started okapi on port $OKAPIPORT. PID=$PID
-sleep 1 # give it time to start
+sleep 2 # give it time to start
 echo
 
 # Load the module
