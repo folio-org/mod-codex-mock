@@ -109,7 +109,7 @@ public class CodexMockImpl implements CodexInstancesResource {
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
       if (mockN != null) {
-        String mq = "id=" + mockN;
+        String mq = "id=*" + mockN + "*";
         if (query == null) {
           query = mq;
         } else {
@@ -169,7 +169,7 @@ public class CodexMockImpl implements CodexInstancesResource {
     String mockN = System.getProperty("mock");
     String query = "id=" + id;
     if (mockN != null) {
-      String mq = "id=" + mockN;
+      String mq = "id=*" + mockN + "*";
       if (query == null) {
         query = mq;
       } else {
