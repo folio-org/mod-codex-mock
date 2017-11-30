@@ -29,7 +29,6 @@ public class MockTest {
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
   private static final String LS = System.lineSeparator();
   private final Header TEN = new Header("X-Okapi-Tenant", "supertenant");
-  private final Header ALLPERM = new Header("X-Okapi-Permissions", "notes.domain.all");
   private final Header USER9 = new Header("X-Okapi-User-Id",
     "99999999-9999-9999-9999-999999999999");
   private final Header USER19 = new Header("X-Okapi-User-Id",
@@ -39,9 +38,9 @@ public class MockTest {
   private final Header USER7 = new Header("X-Okapi-User-Id",
     "77777777-7777-7777-7777-777777777777");
   private final Header JSON = new Header("Content-Type", "application/json");
-  private String moduleName; //  "mod-notes"
+  private String moduleName; //  "mod-codex-mock"
   private String moduleVersion; // "1.0.0" or "0.1.2-SNAPSHOT"
-  private String moduleId; // "mod-notes-1.0.1-SNAPSHOT"
+  private String moduleId; // "mod-codex-mock-0.1.2-SNAPSHOT"
   Vertx vertx;
   Async async;
 
@@ -64,8 +63,8 @@ public class MockTest {
 
     JsonObject conf = new JsonObject()
       .put("http.port", port)
-      .put(HttpClientMock2.MOCK_MODE, "true");
-    logger.info("notesTest: Deploying "
+      .put("mock", "1111");
+    logger.info("Codex Mock Test: Deploying "
       + RestVerticle.class.getName() + " "
       + Json.encode(conf));
     DeploymentOptions opt = new DeploymentOptions()
@@ -73,7 +72,7 @@ public class MockTest {
     vertx.deployVerticle(RestVerticle.class.getName(),
       opt, context.asyncAssertSuccess());
     RestAssured.port = port;
-    logger.info("notesTest: setup done. Using port " + port);
+    logger.info("Codex Mock Test: setup done. Using port " + port);
   }
 
   @After
@@ -95,7 +94,7 @@ public class MockTest {
   @Test
   public void tests(TestContext context) {
     async = context.async();
-    logger.info("notesTest starting");
+    logger.info("Codex mock Test starting");
 
     // Simple GET request to see the module is running and we can talk to it.
     given()
@@ -132,17 +131,17 @@ public class MockTest {
       .log().ifValidationFails()
       .statusCode(201);
 
-    // Empty list of notes
+    // get all
     given()
-      .header(TEN).header(ALLPERM)
+      .header(TEN)
       .get("/codex-instances")
       .then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body(containsString("\"totalRecords\" : 8"));
+      .body(containsString("\"totalRecords\" : 4"));
 
     // All done
-    logger.info("notesTest done");
+    logger.info("codex Mock Test done");
     async.complete();
   }
 

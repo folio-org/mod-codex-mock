@@ -33,13 +33,13 @@ import org.z3950.zing.cql.cql2pgjson.SchemaException;
 
 
 public class CodexMockImpl implements CodexInstancesResource {
-  private final Logger logger = LoggerFactory.getLogger("mod-notes");
+  private final Logger logger = LoggerFactory.getLogger("mod-codex-mock");
   private String MOCK_SCHEMA = null;  // NOSONAR
   public static final String MOCK_TABLE = "codex_mock_data";
   private static final String IDFIELDNAME = "id";
   private static final String MOCK_SCHEMA_NAME = "apidocs/raml/codex.json";
-
   private final Messages messages = Messages.getInstance();
+  private String mockN = "";
 
   private CQLWrapper getCQL(String query, int limit, int offset,
     String schema) throws IOException, FieldException, SchemaException {
@@ -75,6 +75,20 @@ public class CodexMockImpl implements CodexInstancesResource {
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
   }
 
+  private String mockQuery(String query, Context context) {
+    String def = context.config().getString("mock", null);
+    String m = System.getProperty("mock", def);
+    if (m != null) {
+      String mq = "id=*" + m + "*";
+      if (query == null) {
+        return mq;
+      } else {
+        return "(" + query + ") AND (" + mq + ")";
+      }
+    }
+    return query;
+  }
+
   @Override
   public void getCodexInstances(String query, int offset, int limit, String lang,
     Map<String, String> okapiHeaders,
@@ -84,15 +98,8 @@ public class CodexMockImpl implements CodexInstancesResource {
       logger.info("Getting mock instances " + offset + "+" + limit + " q=" + query + " m=" + mockN);
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-
-      if (mockN != null) {
-        String mq = "id=*" + mockN + "*";
-        if (query == null) {
-          query = mq;
-        } else {
-          query = "(" + query + ") AND (" + mq + ")";
-        }
-      }
+      query = mockQuery(query, vertxContext);
+      logger.info("  Mocked query: " + query);
       CQLWrapper cql = getCQL(query, limit, offset, MOCK_SCHEMA);
 
       PostgresClient.getInstance(vertxContext.owner(), tenantId)
@@ -143,12 +150,7 @@ public class CodexMockImpl implements CodexInstancesResource {
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    String mockN = System.getProperty("mock");
-    String query = "id=" + id;
-    if (mockN != null) {
-      String mq = "id=*" + mockN + "*";
-      query = "(" + mq + ") AND (" + query + ")";
-    }
+    String query = mockQuery("id=" + id, vertxContext);
     logger.info("Get one mock " + id + " q=" + query);
     CQLWrapper cql = getCQL(query, 1, 0, MOCK_SCHEMA);
 
