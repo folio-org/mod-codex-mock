@@ -9,23 +9,17 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.ws.rs.core.Response;
+import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
-import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
-import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
-import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.cql.CQLWrapper;
@@ -43,6 +37,7 @@ public class CodexMockImpl implements CodexInstancesResource {
   private String MOCK_SCHEMA = null;  // NOSONAR
   public static final String MOCK_TABLE = "codex_mock_data";
   private static final String IDFIELDNAME = "id";
+  private static final String MOCK_SCHEMA_NAME = "apidocs/raml/codex.json";
 
   private final Messages messages = Messages.getInstance();
 
@@ -58,44 +53,26 @@ public class CodexMockImpl implements CodexInstancesResource {
       .setLimit(new Limit(limit))
       .setOffset(new Offset(offset));
   }
+  private void initCQLValidation() {
+    String path = MOCK_SCHEMA_NAME;
+    try {
+      MOCK_SCHEMA = IOUtils.toString(
+        getClass().getClassLoader().getResourceAsStream(path), "UTF-8");
+    } catch (Exception e) {
+      logger.error("unable to load schema - " + path
+        + ", validation of query fields will not be active");
+    }
+  }
 
   public CodexMockImpl(Vertx vertx, String tenantId) {
     if (MOCK_SCHEMA == null) {
-      //initCQLValidation();  // NOSONAR
-      // Commented out, because it fails a perfectly valid query
+      //initCQLValidation();
+      // Commented out, because it can not find the json files for instance
+      // Was commented out, because it fails a perfectly valid query
       // like metadata.createdDate=2017
       // See RMB-54
     }
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
-  }
-
-  private Instance makeInst(String id) {
-    String key = id.replaceFirst(".*-", "");
-    Instance inst = new Instance();
-    inst.setId(id);
-    inst.setTitle("Title of " + key);
-    inst.setAltTitle("alt title for " + key);
-    inst.setPublisher("Publisher for " + key);
-    inst.setType("Type for " + key);
-    Contributor cont = new Contributor();
-    cont.setName("Contributor of " + key);
-    cont.setType("some type");
-    Set<Contributor> contset = new LinkedHashSet<>();
-    contset.add(cont);
-    inst.setContributor(contset);
-    return inst;
-  }
-
-  public void OLDgetCodexInstances(String query, int offset, int limit, String lang,
-    Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-    List<Instance> lst = new LinkedList<>();
-    lst.add(makeInst("11111111-1111-1111-1111-111111111111"));
-    lst.add(makeInst("11111111-1111-1111-1111-111111111112"));
-    InstanceCollection coll = new InstanceCollection();
-    coll.setInstances(lst);
-    coll.setTotalRecords(2);
-    asyncResultHandler.handle(succeededFuture(GetCodexInstancesResponse.withJsonOK(coll)));
   }
 
   @Override
