@@ -147,11 +147,7 @@ public class CodexMockImpl implements CodexInstancesResource {
     String query = "id=" + id;
     if (mockN != null) {
       String mq = "id=*" + mockN + "*";
-      if (query == null) {
-        query = mq;
-      } else {
-        query = "(" + mq + ") AND (" + query + ")";
-      }
+      query = "(" + mq + ") AND (" + query + ")";
     }
     logger.info("Get one mock " + id + " q=" + query);
     CQLWrapper cql = getCQL(query, 1, 0, MOCK_SCHEMA);
