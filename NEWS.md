@@ -1,3 +1,6 @@
+0.1.1 2017-12-01
+Different source fields in the test data records. Needed for UI development.
+
 0.1.0 2017-12-01
 Uses RMB. Preloads six trivial records into the database at tenant init. These
 can be queried with the usual CQL, and sorted etc. Possible to run multiple
