@@ -12,7 +12,15 @@
       "fromModuleVersion": 0.2,
       "withMetadata": true,
       "generateId": true,
-      "populateJsonWithId": true
+      "populateJsonWithId": true,
+      "ginIndex": [
+        {
+          "fieldName": "title",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     }
   ]
 }
