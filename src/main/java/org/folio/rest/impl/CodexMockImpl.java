@@ -11,6 +11,8 @@ import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
@@ -39,7 +41,6 @@ public class CodexMockImpl implements CodexInstancesResource {
   private static final String IDFIELDNAME = "id";
   private static final String MOCK_SCHEMA_NAME = "apidocs/raml/codex.json";
   private final Messages messages = Messages.getInstance();
-  private String mockN = "";
 
   private CQLWrapper getCQL(String query, int limit, int offset,
     String schema) throws IOException, FieldException, SchemaException {
@@ -75,15 +76,31 @@ public class CodexMockImpl implements CodexInstancesResource {
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
   }
 
-  private String mockQuery(String query, Context context) {
-    String def = context.config().getString("mock", null);
+  private String mockN(Context context) {
+    String def = context.config().getString("mock", "");
     String m = System.getProperty("mock", def);
-    if (m != null) {
+    return m;
+  }
+
+  private String mockQuery(String query, Context context) {
+    String m = mockN(context);
+    if (!m.isEmpty()) {
       String mq = "id=*" + m + "*";
       if (query == null) {
         return mq;
       } else {
-        return "(" + query + ") AND (" + mq + ")";
+        Pattern pat = Pattern.compile("^(.+?)( sortBy .*)?$");
+        Matcher mat = pat.matcher(query);
+        String qry = query;
+        String sort = "";
+        if (mat.find()) {
+          qry = mat.group(1);
+          sort = mat.group(2);
+          if (sort == null) {
+            sort = "";
+          }
+        }
+        return "(" + qry + ") AND (" + mq + ")" + sort;
       }
     }
     return query;
@@ -94,8 +111,8 @@ public class CodexMockImpl implements CodexInstancesResource {
     Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
     try {
-      String mockN = System.getProperty("mock");
-      logger.info("Getting mock instances " + offset + "+" + limit + " q=" + query + " m=" + mockN);
+      logger.info("Getting mock instances " + offset + "+" + limit
+        + " q=" + query + " m=" + mockN(vertxContext));
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
       query = mockQuery(query, vertxContext);
@@ -110,6 +127,17 @@ public class CodexMockImpl implements CodexInstancesResource {
               InstanceCollection instColl = new InstanceCollection();
               @SuppressWarnings("unchecked")
               List<Instance> instList = (List<Instance>) reply.result().getResults();
+              for (Instance i : instList) {
+                if (i == null) {
+                  asyncResultHandler.handle(succeededFuture(
+                    GetCodexInstancesResponse.withPlainInternalServerError(
+                      "Got a null record from the database")));
+                  return;
+                }
+                if (i.getSource() == null || i.getSource().isEmpty()) {
+                  i.setSource("Mock" + mockN(vertxContext));
+                }
+              }
               instColl.setInstances(instList);
               Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
               instColl.setTotalRecords(totalRecords);
@@ -133,7 +161,7 @@ public class CodexMockImpl implements CodexInstancesResource {
       asyncResultHandler.handle(succeededFuture(GetCodexInstancesResponse
         .withJsonUnprocessableEntity(e)));
     } catch (Exception e) {
-      logger.error(e.getMessage(), e);
+      logger.error("Pg Exception: " + e.getMessage(), e);
       String message = messages.getMessage(lang, MessageConsts.InternalServerError);
       if (e.getCause() != null && e.getCause().getClass().getSimpleName()
         .endsWith("CQLParseException")) {
@@ -153,30 +181,49 @@ public class CodexMockImpl implements CodexInstancesResource {
     String query = mockQuery("id=" + id, vertxContext);
     logger.info("Get one mock " + id + " q=" + query);
     CQLWrapper cql = getCQL(query, 1, 0, MOCK_SCHEMA);
-
-    PostgresClient.getInstance(vertxContext.owner(), tenantId)
-      .get(MOCK_TABLE, Instance.class, new String[]{"*"}, cql, true, true,
-        reply -> {
-          if (reply.succeeded()) {
-            @SuppressWarnings("unchecked")
-            List<Instance> instList = (List<Instance>) reply.result().getResults();
-            if (instList.isEmpty()) {
-              logger.info("Got an empty list");
-              asyncResultHandler.handle(succeededFuture(
-                GetCodexInstancesByIdResponse.withPlainNotFound(id)));
+    try {
+      PostgresClient.getInstance(vertxContext.owner(), tenantId)
+        .get(MOCK_TABLE, Instance.class, new String[]{"*"}, cql, true, true,
+          reply -> {
+            if (reply.succeeded()) {
+              @SuppressWarnings("unchecked")
+              List<Instance> instList = (List<Instance>) reply.result().getResults();
+              if (instList.isEmpty()) {
+                logger.info("Got an empty list");
+                asyncResultHandler.handle(succeededFuture(
+                  GetCodexInstancesByIdResponse.withPlainNotFound(id)));
+              } else {
+                Instance inst = instList.get(0);
+                logger.info("Got inst " + Json.encode(instList));
+                if (inst == null) {
+                  asyncResultHandler.handle(succeededFuture(
+                    GetCodexInstancesByIdResponse.withPlainInternalServerError(
+                      "Got a null record from the database")));
+                } else {
+                  if (inst.getSource() == null || inst.getSource().isEmpty()) {
+                    inst.setSource("Mock" + mockN(vertxContext));
+                  }
+                  asyncResultHandler.handle(succeededFuture(
+                    GetCodexInstancesByIdResponse.withJsonOK(inst)));
+                }
+              }
             } else {
-              Instance inst = instList.get(0);
-              logger.info("Got inst " + Json.encode(instList));
+              String error = messages.getMessage(lang, MessageConsts.InternalServerError);
+              logger.error(error, reply.cause());
               asyncResultHandler.handle(succeededFuture(
-                GetCodexInstancesByIdResponse.withJsonOK(inst)));
+                GetCodexInstancesByIdResponse.withPlainInternalServerError(error)));
             }
-          } else {
-            String error = messages.getMessage(lang, MessageConsts.InternalServerError);
-            logger.error(error, reply.cause());
-            asyncResultHandler.handle(succeededFuture(
-              GetCodexInstancesByIdResponse.withPlainInternalServerError(error)));
-          }
-        });
+          });
+    } catch (Exception e) {
+      logger.error("PG exception: " + e.getMessage(), e);
+      String message = messages.getMessage(lang, MessageConsts.InternalServerError);
+      if (e.getCause() != null && e.getCause().getClass().getSimpleName()
+        .endsWith("CQLParseException")) {
+        message = " CQL parse error " + e.getLocalizedMessage();
+      }
+      asyncResultHandler.handle(succeededFuture(GetCodexInstancesResponse
+        .withPlainInternalServerError(message)));
+    }
   }
 
 }

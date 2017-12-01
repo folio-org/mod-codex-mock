@@ -15,7 +15,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
 import static org.hamcrest.Matchers.containsString;
 import org.junit.After;
 import org.junit.Before;
@@ -29,14 +28,6 @@ public class MockTest {
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
   private static final String LS = System.lineSeparator();
   private final Header TEN = new Header("X-Okapi-Tenant", "supertenant");
-  private final Header USER9 = new Header("X-Okapi-User-Id",
-    "99999999-9999-9999-9999-999999999999");
-  private final Header USER19 = new Header("X-Okapi-User-Id",
-    "11999999-9999-9999-9999-999999999911");  // One that is not found in the mock data
-  private final Header USER8 = new Header("X-Okapi-User-Id",
-    "88888888-8888-8888-8888-888888888888");
-  private final Header USER7 = new Header("X-Okapi-User-Id",
-    "77777777-7777-7777-7777-777777777777");
   private final Header JSON = new Header("Content-Type", "application/json");
   private String moduleName; //  "mod-codex-mock"
   private String moduleVersion; // "1.0.0" or "0.1.2-SNAPSHOT"
@@ -56,14 +47,14 @@ public class MockTest {
       PostgresClient.setIsEmbedded(true);
       PostgresClient.getInstance(vertx).startEmbeddedPostgres();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.warn("Exception in test setup: ", e);
       context.fail(e);
       return;
     }
 
     JsonObject conf = new JsonObject()
-      .put("http.port", port)
-      .put("mock", "1111");
+      .put("mock", "1111")
+      .put("http.port", port);
     logger.info("Codex Mock Test: Deploying "
       + RestVerticle.class.getName() + " "
       + Json.encode(conf));
@@ -136,9 +127,46 @@ public class MockTest {
       .header(TEN)
       .get("/codex-instances")
       .then()
+      .log().all() // .ifValidationFails()
+      .body(containsString("\"totalRecords\" : 4"))
+      .statusCode(200);
+
+    // get one
+    given()
+      .header(TEN)
+      .get("/codex-instances/11111111-1111-1111-1111-111111111111")
+      .then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body(containsString("\"totalRecords\" : 4"));
+      .body(containsString("alt title for 111111111111"));
+
+    // query
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=title=000000000001")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("Title of 000000000001"))
+      .statusCode(200);
+
+    // limit
+    given()
+      .header(TEN)
+      .get("/codex-instances?offset=1&limit=2")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("111111111111"))
+      .body(containsString("111111111112"))
+      .statusCode(200);
+
+    // sort
+    given()
+      .header(TEN)
+      .get("/codex-instances?offset=0&limit=1&query=publisher=for sortBy publisher")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("alpha publisher"))
+      .statusCode(200);
 
     // All done
     logger.info("codex Mock Test done");
