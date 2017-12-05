@@ -140,6 +140,14 @@ public class MockTest {
       .statusCode(200)
       .body(containsString("alt title for 111111111111"));
 
+    // unknown id
+    given()
+      .header(TEN)
+      .get("/codex-instances/99999999-9999-9999-9999-987654321111")
+      .then()
+      .log().ifValidationFails()
+      .statusCode(404);
+
     // query
     given()
       .header(TEN)
@@ -148,6 +156,14 @@ public class MockTest {
       .log().ifValidationFails()
       .body(containsString("Title of 000000000001"))
       .statusCode(200);
+
+    // bad query
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=BAD")
+      .then()
+      .log().ifValidationFails()
+      .statusCode(422);
 
     // limit
     given()

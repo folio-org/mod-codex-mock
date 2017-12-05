@@ -78,32 +78,30 @@ public class CodexMockImpl implements CodexInstancesResource {
 
   private String mockN(Context context) {
     String def = context.config().getString("mock", "");
-    String m = System.getProperty("mock", def);
-    return m;
+    return System.getProperty("mock", def);
   }
 
   private String mockQuery(String query, Context context) {
     String m = mockN(context);
-    if (!m.isEmpty()) {
-      String mq = "id=*" + m + "*";
-      if (query == null) {
-        return mq;
-      } else {
-        Pattern pat = Pattern.compile("^(.+?)( sortBy .*)?$");
-        Matcher mat = pat.matcher(query);
-        String qry = query;
-        String sort = "";
-        if (mat.find()) {
-          qry = mat.group(1);
-          sort = mat.group(2);
-          if (sort == null) {
-            sort = "";
-          }
-        }
-        return "(" + qry + ") AND (" + mq + ")" + sort;
+    if (m.isEmpty()) {
+      return query;
+    }
+    String mq = "id=*" + m + "*";
+    if (query == null) {
+      return mq;
+    }
+    Pattern pat = Pattern.compile("^(.+?)( sortBy .*)?$");
+    Matcher mat = pat.matcher(query);
+    String qry = query;
+    String sort = "";
+    if (mat.find()) {
+      qry = mat.group(1);
+      sort = mat.group(2);
+      if (sort == null) {
+        sort = "";
       }
     }
-    return query;
+    return "(" + qry + ") AND (" + mq + ")" + sort;
   }
 
   @Override
@@ -191,7 +189,8 @@ public class CodexMockImpl implements CodexInstancesResource {
               if (instList.isEmpty()) {
                 logger.info("Got an empty list");
                 asyncResultHandler.handle(succeededFuture(
-                  GetCodexInstancesByIdResponse.withPlainNotFound(id)));
+                  GetCodexInstancesByIdResponse.withPlainNotFound(
+                          "Instance " + id + " not found")));
               } else {
                 Instance inst = instList.get(0);
                 logger.info("Got inst " + Json.encode(instList));
