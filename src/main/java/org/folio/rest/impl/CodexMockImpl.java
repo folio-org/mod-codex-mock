@@ -132,7 +132,8 @@ public class CodexMockImpl implements CodexInstancesResource {
                       "Got a null record from the database")));
                   return;
                 }
-                if (i.getSource() == null || i.getSource().isEmpty()) {
+                String mockN = mockN(vertxContext);
+                if (i.getSource() == null || i.getSource().isEmpty() || !mockN.isEmpty()) {
                   i.setSource("Mock" + mockN(vertxContext));
                 }
               }
