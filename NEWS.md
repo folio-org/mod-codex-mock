@@ -1,3 +1,7 @@
+0.1.2 2017-12-08
+* More test data, naively converted from real MarcXml records
+* When running in mockXXXX mode, overwrite the source with mockXXX
+
 0.1.1 2017-12-01
 Different source fields in the test data records. Needed for UI development.
 
