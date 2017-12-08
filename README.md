@@ -19,6 +19,14 @@ shows what it can do. It isn't all that much, but it shows that something works.
 The module loads a hard-coded list of instances into its database at tenant-init
 time. These can be queried and sorted according to the usual RMB conventions.
 
+
+### Test data
+There is a shell script called `makedata.sh` under the scripts directory. It
+takes two marcXML files and converts them into format that can be used as test
+data for the module. The records get various 'source' fields, namely "local",
+"kb", or "mock", as is needed by the UI development. Their IDs are in the 7777
+series.
+
 ### Multiple instances
 It is possible to enable the module several times for a tenant, by using the
 ModuleDescritors -one and -two that are provided. These have the `InterfaceType`

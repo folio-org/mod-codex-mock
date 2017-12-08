@@ -45,9 +45,9 @@ sleep 1
 
 
 # Various tests
-echo Test 1: list the items
+echo Test 1: list some items
 $CURL $TEN \
-  $OKAPIURL/codex-instances
+  $OKAPIURL/codex-instances?query=title=news
 echo
 
 # Various tests
