@@ -1,6 +1,6 @@
 {
   "id": "${artifactId}-${version}",
-  "name": "Notes",
+  "name": "Codex Mock",
   "requires": [],
   "provides": [
     {
