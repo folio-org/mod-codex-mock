@@ -13,12 +13,17 @@ This module provides a very minimal implementation of the codex interface. It
 has a small number of hard coded records, that it can list, and provide by the
 id.
 
-There is a script `run.sh` that loads the module into Okapi, enables it, and
-shows what it can do. It isn't all that much, but it shows that something works.
-
 The module loads a hard-coded list of instances into its database at tenant-init
 time. These can be queried and sorted according to the usual RMB conventions.
 
+By default the ModuleDescriptor has the `"interfaceType"` set to `"multiple"`,
+so it will be loaded in a multiple mode. This means you have to use an extra
+header to make calls to it.
+
+There is a script `run.sh` that loads the module into Okapi, enables it, and
+shows what it can do. It isn't all that much, but it shows that something works.
+This script uses the ModuleDescriptor-standalone.json to load the module, so
+that it can run in stand-alone, without the `"interfaceType": "multiple"`.
 
 ### Test data
 There is a shell script called `makedata.sh` under the scripts directory. It
@@ -37,6 +42,8 @@ records with one, the other, or both of these strings.
 
 This facility is intended for testing and developing the mod-codex-mux module,
 which needs to merge data from multiple sources.
+
+There is a script `run-multi.sh` that demonstrates how this works.
 
 ## Additional information
 
