@@ -35,7 +35,7 @@ while(<$fh>) {
     $pub = join(", ", $pub, $puby);
     my $id = "77777777-7777-7777-7777-000000" . sprintf("%06d", $recno++);
     my $src = $sources[$recno % 3];
-    my $type = "unknown";
+    my $type = "books";
     if ( $title ) {
       my $json = "{ \"title\":\"$title\" ";
       $json .= ", \"altTitle\":\"$alt\" " if ($alt);
@@ -44,7 +44,8 @@ while(<$fh>) {
       $json .= ", \"publisher\":\"$pub\" " if ($pub);
       $json .= ", \"identifier\": [  { \"type\":\"isbn\", "
                 . " \"value\":\"$isbn\" } ] " if ($isbn);
-      $json .= ", \"source\":\"$src\" } ";
+      $json .= ", \"type\":\"$type\" ";
+      $json .= ", \"source\":\"$src\" }";
       print $of "$id| $json\n";
     }
     ($title, $alt, $auth, $pub, $puby,$isbn) = ("","","","","","");
