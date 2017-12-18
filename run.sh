@@ -27,7 +27,7 @@ echo
 
 # Load the module
 echo "Loading mod-codex-mock"
-$CURL -X POST -d@target/ModuleDescriptor.json $OKAPIURL/_/proxy/modules
+$CURL -X POST -d@target/ModuleDescriptor-standalone.json $OKAPIURL/_/proxy/modules
 echo
 
 echo "Deploying it"
