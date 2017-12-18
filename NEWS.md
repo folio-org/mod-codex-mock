@@ -1,3 +1,8 @@
+## 1.0.1 2017-12-18
+
+* MODCXMOCK-10 Fix convert.pl to produce data according to the latest schema,
+  and run.sh to use the newly introduced ModuleDescriptor-standalone.json.
+
 ## 1.0.0 2017-12-15
 
 * MODCXMOCK-9 Update to RAML as of December 15, 2017. Test data updated a bit
