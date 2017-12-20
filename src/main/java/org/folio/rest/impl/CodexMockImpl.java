@@ -61,17 +61,14 @@ public class CodexMockImpl implements CodexInstancesResource {
         getClass().getClassLoader().getResourceAsStream(path), "UTF-8");
     } catch (Exception e) {
       logger.error("unable to load schema - " + path
-        + ", validation of query fields will not be active");
+        + ", validation of query fields will not be active", e);
     }
   }
 
   public CodexMockImpl(Vertx vertx, String tenantId) {
     if (MOCK_SCHEMA == null) {
-      //initCQLValidation();
-      // Commented out, because it can not find the json files for instance
-      // Was commented out, because it fails a perfectly valid query
-      // like metadata.createdDate=2017
-      // See RMB-54
+      initCQLValidation();
+      // This seems not to work, logs the "unable to load schema" message above
     }
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
   }

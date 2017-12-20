@@ -156,7 +156,23 @@ public class MockTest {
       .log().ifValidationFails()
       .body(containsString("Title of 000000000001"))
       .statusCode(200);
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=publisher=beta")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("Title of 111111111112"))
+      .statusCode(200);
 
+    /* This does not work. No idea how we do author search
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=conbtributor=111111111111")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("Title of 111111111111"))
+      .statusCode(200);
+    */
     // bad query
     given()
       .header(TEN)
@@ -164,6 +180,16 @@ public class MockTest {
       .then()
       .log().ifValidationFails()
       .statusCode(422);
+
+    // bad query - the query validation ought to catch this
+    // But it does not. Logs the "unable to load schema" message, and accepts all...
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=UNKNOWNFIELD=foo")
+      .then()
+      .log().ifValidationFails()
+      .statusCode(200);
+    //.statusCode(422);
 
     // limit
     given()
