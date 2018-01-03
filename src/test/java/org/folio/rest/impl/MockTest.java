@@ -232,7 +232,7 @@ public class MockTest {
     // Query manipulations: issn
     given()
       .header(TEN)
-      .get("/codex-instances?query=identifier/type=issn=1111111111")
+      .get("/codex-instances?query=identifier /type=issn = 1111111111")
       .then()
       .log().ifValidationFails()
       .body(containsString("\"totalRecords\" : 1"))
