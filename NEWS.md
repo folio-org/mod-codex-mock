@@ -1,3 +1,11 @@
+## 1.0.2 2018-01-04
+
+* MODCXMOCK-12. Accept proper codex queries. Queries of `resourceType` get
+  mapped to `type`, and there is special handling of isbn and issn queries,
+  mapping `identifier /type=isbn = 123` into something like `(identifier=isbn
+  and identifier="123"*)`. These mappings are quite crude, but seem to be
+  sufficient for the mock module.
+
 ## 1.0.1 2017-12-18
 
 * MODCXMOCK-10 Fix convert.pl to produce data according to the latest schema,
