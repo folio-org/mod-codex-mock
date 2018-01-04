@@ -1,5 +1,11 @@
 ## 1.0.2 2018-01-04
 
+* MODCXMOCK-13. Hard-code all records to return "kb" in their "source" field.
+  Also, add a command-line option `-Dsource=xxxx` to override the source on
+  all returned records - unfortunately only after the search is done.
+
+## 1.0.2 2018-01-04
+
 * MODCXMOCK-12. Accept proper codex queries. Queries of `resourceType` get
   mapped to `type`, and there is special handling of isbn and issn queries,
   mapping `identifier /type=isbn = 123` into something like `(identifier=isbn
