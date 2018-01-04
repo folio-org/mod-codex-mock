@@ -34,7 +34,7 @@ while(<$fh>) {
   if (/^\.*$/) { # empty line separates records
     $pub = join(", ", $pub, $puby);
     my $id = "77777777-7777-7777-7777-000000" . sprintf("%06d", $recno++);
-    my $src = $sources[$recno % 3];
+    my $src = "kb"; # MODCXMOCK-13   $sources[$recno % 3];
     my $type = "books";
     if ( $title ) {
       my $json = "{ \"title\":\"$title\" ";
