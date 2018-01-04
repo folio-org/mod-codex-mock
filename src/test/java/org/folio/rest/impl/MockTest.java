@@ -54,6 +54,7 @@ public class MockTest {
 
     JsonObject conf = new JsonObject()
       .put("mock", "1111")
+      .put("source", "unitTest")
       .put("http.port", port);
     logger.info("Codex Mock Test: Deploying "
       + RestVerticle.class.getName() + " "
@@ -138,7 +139,8 @@ public class MockTest {
       .then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body(containsString("alt title for 111111111111"));
+      .body(containsString("alt title for 111111111111"))
+      .body(containsString("unitTest"));
 
     // unknown id
     given()
@@ -162,17 +164,23 @@ public class MockTest {
       .then()
       .log().ifValidationFails()
       .body(containsString("Title of 111111111112"))
+      .body(containsString("unitTest"))
       .statusCode(200);
-
-    /* This does not work. No idea how we do author search
     given()
       .header(TEN)
-      .get("/codex-instances?query=conbtributor=111111111111")
+      .get("/codex-instances?query=contributor=Contributor of 111111111111")
       .then()
       .log().ifValidationFails()
       .body(containsString("Title of 111111111111"))
       .statusCode(200);
-    */
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=contributor=*111111111111*")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("Title of 111111111111"))
+      .statusCode(200);
+
     // bad query
     given()
       .header(TEN)

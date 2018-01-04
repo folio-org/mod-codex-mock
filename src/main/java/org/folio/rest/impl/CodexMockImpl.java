@@ -74,11 +74,25 @@ public class CodexMockImpl implements CodexInstancesResource {
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
   }
 
+
+  /*
+  Get the mock number from a -D command line option, or context config, whihc
+  is where the unit test can put it. Returns "" if none.
+   *
+   */
   private String mockN(Context context) {
     String def = context.config().getString("mock", "");
     return System.getProperty("mock", def);
   }
 
+  /*
+  Get the source override value from the -D command line option, or context.
+  If specified, this will be put in all returned records.
+   */
+  private String overrideSrc(Context context) {
+    String def = context.config().getString("source", "");
+    return System.getProperty("source", def);
+  }
   /*
   Query rewriting:
     - resourceType -> type
@@ -145,7 +159,10 @@ public class CodexMockImpl implements CodexInstancesResource {
                   return;
                 }
                 String mockN = mockN(vertxContext);
-                if (i.getSource() == null || i.getSource().isEmpty() || !mockN.isEmpty()) {
+                String src = overrideSrc(vertxContext);
+                if (!src.isEmpty()) {
+                  i.setSource(src);
+                } else if (i.getSource() == null || i.getSource().isEmpty() || !mockN.isEmpty()) {
                   i.setSource("Mock" + mockN(vertxContext));
                 }
               }
@@ -212,7 +229,10 @@ public class CodexMockImpl implements CodexInstancesResource {
                     GetCodexInstancesByIdResponse.withPlainInternalServerError(
                       "Got a null record from the database")));
                 } else {
-                  if (inst.getSource() == null || inst.getSource().isEmpty()) {
+                  String src = overrideSrc(vertxContext);
+                  if (!src.isEmpty()) {
+                    inst.setSource(src);
+                  } else if (inst.getSource() == null || inst.getSource().isEmpty()) {
                     inst.setSource("Mock" + mockN(vertxContext));
                   }
                   asyncResultHandler.handle(succeededFuture(
