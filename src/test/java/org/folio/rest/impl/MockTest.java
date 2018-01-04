@@ -210,6 +210,35 @@ public class MockTest {
       .body(containsString("alpha publisher"))
       .statusCode(200);
 
+    // Query manipulations: resourceType -> type
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=resourceType=books")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("\"totalRecords\" : 4"))
+      .statusCode(200);
+
+    // Query manipulations: isbn
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=identifier/type=isbn=1111111111")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("\"totalRecords\" : 1"))
+      .body(containsString("111111111112"))
+      .statusCode(200);
+
+    // Query manipulations: issn
+    given()
+      .header(TEN)
+      .get("/codex-instances?query=identifier /type=issn = 1111111111")
+      .then()
+      .log().ifValidationFails()
+      .body(containsString("\"totalRecords\" : 1"))
+      .body(containsString("000000000001"))
+      .statusCode(200);
+
     // All done
     logger.info("codex Mock Test done");
     async.complete();

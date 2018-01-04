@@ -67,7 +67,8 @@ public class CodexMockImpl implements CodexInstancesResource {
 
   public CodexMockImpl(Vertx vertx, String tenantId) {
     if (MOCK_SCHEMA == null) {
-      initCQLValidation();
+      //initCQLValidation();
+      logger.warn("InitCqlValidation is COMMENTED OUT, because it does not work!");
       // This seems not to work, logs the "unable to load schema" message above
     }
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
@@ -78,7 +79,21 @@ public class CodexMockImpl implements CodexInstancesResource {
     return System.getProperty("mock", def);
   }
 
+  /*
+  Query rewriting:
+    - resourceType -> type
+    - identifier/type=isbn ->  (identifier=isbn and identifier=XXXX)
+   */
   private String mockQuery(String query, Context context) {
+    if (query != null) {
+      query = query.replaceAll("resourceType", "type");
+      query = query.replaceAll("identifier */type=isbn *= *([0-9a-zA-Z-]+)",
+        "(identifier=isbn AND identifier=\"$1\"*)");
+      query = query.replaceAll("identifier */type=issn *= *([0-9a-zA-Z-]+)",
+        "(identifier=issn AND identifier=\"$1\"*)");
+      // For some reason the asterisk is required, or it will not match
+      // numbers that do not start with a leading zero !!?!
+    }
     String m = mockN(context);
     if (m.isEmpty()) {
       return query;

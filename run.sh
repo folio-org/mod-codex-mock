@@ -64,12 +64,16 @@ read
 # Clean up
 echo "Cleaning up: Killing Okapi $PID"
 kill $PID
-ps | grep java && ( echo ... ; sleep 1  )
-ps | grep java && ( echo ... ; sleep 1  )
-ps | grep java && ( echo ... ; sleep 1  )
-ps | grep java && ( echo ... ; sleep 1  )
-ps | grep java && ( echo ... ; sleep 1  )
-rm -rf /tmp/postgresql-embed*
+for N in 1 2 3 4 5 6 7 8 9 10
+do
+  ps | grep java && ( echo $N ... ; sleep $N )
+done
+for N in 1 2 3 4 5 6 7 8 9 10
+do
+  ps | grep postgres && ( echo $N ... ; sleep $N )
+done
 ps | grep java | grep -v "grep java" && echo "OOPS - Still some java processes running"
+ps | grep postgres | grep -v "grep postgres" && echo "OOPS - postgres is still running"
+rm -rf /tmp/postgresql-embed*
 echo bye
 
