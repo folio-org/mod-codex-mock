@@ -20,6 +20,7 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
+import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
@@ -172,7 +173,10 @@ public class CodexMockImpl implements CodexInstancesResource {
               }
               instColl.setInstances(instList);
               Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
-              instColl.setTotalRecords(totalRecords);
+              ResultInfo ri = new ResultInfo();
+              ri.setTotalRecords(totalRecords);
+              instColl.setResultInfo(ri);
+              //instColl.setTotalRecords(totalRecords);
               asyncResultHandler.handle(succeededFuture(
                 GetCodexInstancesResponse.withJsonOK(instColl)));
             } else {

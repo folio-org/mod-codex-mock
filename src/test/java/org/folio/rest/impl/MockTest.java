@@ -130,6 +130,7 @@ public class MockTest {
       .then()
       .log().all() // .ifValidationFails()
       .body(containsString("\"totalRecords\" : 4"))
+      .body(containsString("resultInfo"))
       .statusCode(200);
 
     // get one
