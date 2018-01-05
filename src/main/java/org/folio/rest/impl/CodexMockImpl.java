@@ -9,6 +9,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -32,6 +33,7 @@ import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
 import org.z3950.zing.cql.cql2pgjson.SchemaException;
+import org.z3950.zing.cql.cql2pgjson.ServerChoiceIndexesException;
 
 
 public class CodexMockImpl implements CodexInstancesResource {
@@ -43,17 +45,19 @@ public class CodexMockImpl implements CodexInstancesResource {
   private final Messages messages = Messages.getInstance();
 
   private CQLWrapper getCQL(String query, int limit, int offset,
-    String schema) throws IOException, FieldException, SchemaException {
+    String schema) throws IOException, FieldException, SchemaException, ServerChoiceIndexesException {
     CQL2PgJSON cql2pgJson = null;
+    List serverChoice =  Arrays.asList("title","contributor");
     if (schema != null) {
-      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", schema);
+      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", schema, serverChoice);
     } else {
-      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb");
+      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", serverChoice);
     }
     return new CQLWrapper(cql2pgJson, query)
       .setLimit(new Limit(limit))
       .setOffset(new Offset(offset));
   }
+
   private void initCQLValidation() {
     String path = MOCK_SCHEMA_NAME;
     try {
