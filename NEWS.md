@@ -1,4 +1,8 @@
-## 1.0.2 2018-01-04
+## 2.0.0 2018-01-09
+* MODCXMOCK-14: Switch to providing the codex interface version 3.0, with a
+  resultInfo, instead of the old resultCount.
+
+## 1.0.3 2018-01-04
 
 * MODCXMOCK-13. Hard-code all records to return "kb" in their "source" field.
   Also, add a command-line option `-Dsource=xxxx` to override the source on
