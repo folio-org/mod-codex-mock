@@ -47,7 +47,7 @@ public class CodexMockImpl implements CodexInstancesResource {
 
   private CQLWrapper getCQL(String query, int limit, int offset,
     String schema) throws IOException, FieldException, SchemaException, ServerChoiceIndexesException {
-    CQL2PgJSON cql2pgJson = null;
+    CQL2PgJSON cql2pgJson;
     List serverChoice =  Arrays.asList("title","contributor");
     if (schema != null) {
       cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", schema, serverChoice);
@@ -80,10 +80,9 @@ public class CodexMockImpl implements CodexInstancesResource {
   }
 
 
-  /*
-  Get the mock number from a -D command line option, or context config, whihc
+  /**
+  Get the mock number. From a -D command line option, or context config, which
   is where the unit test can put it. Returns "" if none.
-   *
    */
   private String mockN(Context context) {
     String def = context.config().getString("mock", "");
@@ -98,10 +97,16 @@ public class CodexMockImpl implements CodexInstancesResource {
     String def = context.config().getString("source", "");
     return System.getProperty("source", def);
   }
-  /*
-  Query rewriting:
+
+  /**
+  Query rewriting.
     - resourceType -> type
     - identifier/type=isbn ->  (identifier=isbn and identifier=XXXX)
+    - identifier/type=issn ->  (identifier=issn and identifier=XXXX)
+  The isbn/issn query is a bit misleading, it will get false positives if
+  a record has an isbn with a wrong number, and any other identifier with
+  the right one. That is not a problem here, since our mock data only has isbns,
+  except for one record that has an issn, and no record has multiple identifiers.
    */
   private String mockQuery(String query, Context context) {
     if (query != null) {
@@ -176,7 +181,6 @@ public class CodexMockImpl implements CodexInstancesResource {
               ResultInfo ri = new ResultInfo();
               ri.setTotalRecords(totalRecords);
               instColl.setResultInfo(ri);
-              //instColl.setTotalRecords(totalRecords);
               asyncResultHandler.handle(succeededFuture(
                 GetCodexInstancesResponse.withJsonOK(instColl)));
             } else {
