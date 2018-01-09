@@ -9,6 +9,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,6 +20,7 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
+import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
@@ -32,6 +34,7 @@ import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
 import org.z3950.zing.cql.cql2pgjson.SchemaException;
+import org.z3950.zing.cql.cql2pgjson.ServerChoiceIndexesException;
 
 
 public class CodexMockImpl implements CodexInstancesResource {
@@ -43,17 +46,19 @@ public class CodexMockImpl implements CodexInstancesResource {
   private final Messages messages = Messages.getInstance();
 
   private CQLWrapper getCQL(String query, int limit, int offset,
-    String schema) throws IOException, FieldException, SchemaException {
-    CQL2PgJSON cql2pgJson = null;
+    String schema) throws IOException, FieldException, SchemaException, ServerChoiceIndexesException {
+    CQL2PgJSON cql2pgJson;
+    List serverChoice =  Arrays.asList("title","contributor");
     if (schema != null) {
-      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", schema);
+      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", schema, serverChoice);
     } else {
-      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb");
+      cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", serverChoice);
     }
     return new CQLWrapper(cql2pgJson, query)
       .setLimit(new Limit(limit))
       .setOffset(new Offset(offset));
   }
+
   private void initCQLValidation() {
     String path = MOCK_SCHEMA_NAME;
     try {
@@ -75,10 +80,9 @@ public class CodexMockImpl implements CodexInstancesResource {
   }
 
 
-  /*
-  Get the mock number from a -D command line option, or context config, whihc
+  /**
+  Get the mock number. From a -D command line option, or context config, which
   is where the unit test can put it. Returns "" if none.
-   *
    */
   private String mockN(Context context) {
     String def = context.config().getString("mock", "");
@@ -93,10 +97,16 @@ public class CodexMockImpl implements CodexInstancesResource {
     String def = context.config().getString("source", "");
     return System.getProperty("source", def);
   }
-  /*
-  Query rewriting:
+
+  /**
+  Query rewriting.
     - resourceType -> type
     - identifier/type=isbn ->  (identifier=isbn and identifier=XXXX)
+    - identifier/type=issn ->  (identifier=issn and identifier=XXXX)
+  The isbn/issn query is a bit misleading, it will get false positives if
+  a record has an isbn with a wrong number, and any other identifier with
+  the right one. That is not a problem here, since our mock data only has isbns,
+  except for one record that has an issn, and no record has multiple identifiers.
    */
   private String mockQuery(String query, Context context) {
     if (query != null) {
@@ -168,7 +178,9 @@ public class CodexMockImpl implements CodexInstancesResource {
               }
               instColl.setInstances(instList);
               Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
-              instColl.setTotalRecords(totalRecords);
+              ResultInfo ri = new ResultInfo();
+              ri.setTotalRecords(totalRecords);
+              instColl.setResultInfo(ri);
               asyncResultHandler.handle(succeededFuture(
                 GetCodexInstancesResponse.withJsonOK(instColl)));
             } else {

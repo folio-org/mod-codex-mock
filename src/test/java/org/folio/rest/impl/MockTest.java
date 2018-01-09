@@ -130,6 +130,7 @@ public class MockTest {
       .then()
       .log().all() // .ifValidationFails()
       .body(containsString("\"totalRecords\" : 4"))
+      .body(containsString("resultInfo"))
       .statusCode(200);
 
     // get one
@@ -181,13 +182,13 @@ public class MockTest {
       .body(containsString("Title of 111111111111"))
       .statusCode(200);
 
-    // bad query
+    // ServerChoice
     given()
       .header(TEN)
-      .get("/codex-instances?query=BAD")
+      .get("/codex-instances?query=Title")
       .then()
       .log().ifValidationFails()
-      .statusCode(422);
+      .statusCode(200);
 
     // bad query - the query validation ought to catch this
     // But it does not. Logs the "unable to load schema" message, and accepts all...
