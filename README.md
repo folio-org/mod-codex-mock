@@ -34,7 +34,7 @@ series.
 
 ### Multiple instances
 It is possible to enable the module several times for a tenant, by using the
-ModuleDescritors -one and -two that are provided. These have the `InterfaceType`
+ModuleDescriptors -one and -two that are provided. These have the `InterfaceType`
 set to `multiple`. The corresponding DeploymentDescriptors have a `-Dmock=1111`
 or `-dmock=2222` on their command line. This causes the module to filter out only
 records that contain that string as a part of their ids.  The test data contains
