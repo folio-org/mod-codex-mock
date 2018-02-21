@@ -48,7 +48,7 @@ public class CodexMockImpl implements CodexInstancesResource {
   private CQLWrapper getCQL(String query, int limit, int offset,
     String schema) throws IOException, FieldException, SchemaException, ServerChoiceIndexesException {
     CQL2PgJSON cql2pgJson;
-    List serverChoice =  Arrays.asList("title","contributor");
+    List<String> serverChoice = Arrays.asList("title", "contributor");
     if (schema != null) {
       cql2pgJson = new CQL2PgJSON(MOCK_TABLE + ".jsonb", schema, serverChoice);
     } else {
