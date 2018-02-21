@@ -50,7 +50,6 @@ $CURL $TEN \
   $OKAPIURL/codex-instances?query=title=news
 echo
 
-# Various tests
 echo Test 2: Get one item
 $CURL $TEN \
   $OKAPIURL/codex-instances/11111111-1111-1111-1111-111111111111
