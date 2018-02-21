@@ -1,3 +1,6 @@
+## 2.1.0 2018-02-21
+* MODCXMOCK-15: Default source to "mock", not "kb". 
+
 ## 2.0.0 2018-01-09
 * MODCXMOCK-14: Switch to providing the codex interface version 3.0, with a
   resultInfo, instead of the old resultCount.
