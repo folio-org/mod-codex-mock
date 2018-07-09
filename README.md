@@ -49,11 +49,11 @@ There is a script `run-multi.sh` that demonstrates how this works.
 
 ### Other documentation
 
-Other [modules](http://dev.folio.org/source-code/#server-side) are described,
-with further FOLIO Developer documentation at [dev.folio.org](http://dev.folio.org/)
+Other [modules](https://dev.folio.org/source-code/#server-side) are described,
+with further FOLIO Developer documentation at [dev.folio.org](https://dev.folio.org/)
 
 ### Issue tracker
 
 See project [MODCXMOCK](https://issues.folio.org/browse/MODCXMOCK)
-at the [FOLIO issue tracker](http://dev.folio.org/community/guide-issues).
+at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker).
 
